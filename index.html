@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <title>Task Garden</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,18 +14,20 @@
             --card: rgba(30, 41, 59, 0.5);
             --muted: #94a3b8;
             --accent: #38bdf8;
-            --g-pale: #4ade80;
+            --green: #4ade80;
             --yellow: #facc15; 
             --red: #ef4444;
             --border: rgba(255, 255, 255, 0.1);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         html, body { 
             margin: 0; padding: 0; height: 100%; width: 100%; 
             background: var(--bg); color: #fff;
             font-family: -apple-system, system-ui, sans-serif;
             overflow: hidden;
+            user-select: none; /* Prevents text selection during swipes */
         }
 
         body { background: radial-gradient(circle at top right, #0f172a, #020617); }
@@ -33,21 +35,28 @@
         /* Navigation Dots */
         .nav-dots {
             position: fixed; bottom: calc(env(safe-area-inset-bottom) + 20px);
-            left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 100;
+            left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 100;
+            padding: 10px;
         }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); transition: 0.3s; }
+        .dot { 
+            width: 8px; height: 8px; border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.2); transition: 0.3s; 
+            cursor: pointer;
+        }
         .dot.active { background: var(--accent); transform: scale(1.3); box-shadow: 0 0 10px var(--accent); }
 
         /* Screen Container */
         #screen-container { 
             display: flex; width: 300%; height: 100%; 
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: grab;
         }
+        #screen-container:active { cursor: grabbing; }
 
         .view { 
-            width: 33.333333%; height: 100%; overflow-y: auto; padding: 1.5rem; 
+            width: 33.3333%; height: 100%; overflow-y: auto; padding: 1.5rem; 
             padding-top: calc(env(safe-area-inset-top) + 20px); 
-            padding-bottom: 120px;
+            padding-bottom: 150px;
         }
 
         h2 { font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1.5rem; }
@@ -58,45 +67,54 @@
             border-radius: 20px; padding: 1rem; margin-bottom: 0.8rem;
             border: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
             animation: slideIn 0.3s ease-out;
+            transition: transform 0.1s;
         }
+        .task-card:active { transform: scale(0.98); }
+
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .priority-dot { width: 4px; height: 24px; border-radius: 2px; }
+        .priority-dot { width: 4px; height: 24px; border-radius: 2px; flex-shrink: 0; }
         .p-high { background: var(--red); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
         .p-mid { background: var(--yellow); }
         .p-low { background: var(--accent); }
 
-        .task-content { flex: 1; }
-        .task-title { font-size: 1rem; font-weight: 500; margin-bottom: 2px; }
+        .task-content { flex: 1; cursor: pointer; }
+        .task-title { font-size: 1rem; font-weight: 500; margin-bottom: 2px; word-break: break-word; }
         .task-meta { font-size: 0.75rem; color: var(--muted); }
 
         .check-btn {
-            width: 28px; height: 28px; border-radius: 50%; 
+            width: 32px; height: 32px; border-radius: 50%; 
             border: 2px solid var(--border); display: flex; align-items: center; 
             justify-content: center; cursor: pointer; transition: 0.2s;
+            flex-shrink: 0;
         }
-        .check-btn.done { background: var(--g-pale); border-color: var(--g-pale); color: #020617; }
+        .check-btn.done { background: var(--green); border-color: var(--green); color: #020617; font-weight: bold; }
 
         /* Input Area */
         .input-bar {
-            position: fixed; bottom: calc(env(safe-area-inset-bottom) + 50px);
+            position: fixed; bottom: calc(env(safe-area-inset-bottom) + 55px);
             left: 1.5rem; right: 1.5rem; z-index: 10;
         }
         .input-box {
-            background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border);
             border-radius: 20px; padding: 12px 18px; display: flex; gap: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
         }
-        input { background: none; border: none; color: #fff; flex: 1; outline: none; font-size: 1rem; }
-        select { background: none; border: none; color: var(--accent); font-weight: bold; outline: none; }
+        input { 
+            background: none; border: none; color: #fff; flex: 1; 
+            outline: none; font-size: 1rem; user-select: text; 
+        }
+        input::placeholder { color: var(--muted); }
+        select { background: none; border: none; color: var(--accent); font-weight: bold; outline: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="nav-dots">
-    <div class="dot active" id="dot0"></div>
-    <div class="dot" id="dot1"></div>
-    <div class="dot" id="dot2"></div>
+    <div class="dot active" data-index="0"></div>
+    <div class="dot" data-index="1"></div>
+    <div class="dot" data-index="2"></div>
 </div>
 
 <div id="screen-container">
@@ -118,13 +136,13 @@
 
 <div class="input-bar">
     <div class="input-box">
-        <input type="text" id="taskInput" placeholder="Add a new task..." onkeypress="handleKey(event)">
+        <input type="text" id="taskInput" placeholder="Add a new task..." autocomplete="off">
         <select id="priorityInput">
             <option value="p-low">Low</option>
             <option value="p-mid">Mid</option>
             <option value="p-high">High</option>
         </select>
-        <button onclick="addTask()" style="background: var(--accent); border: none; border-radius: 12px; padding: 8px 15px; font-weight: bold; color: #020617;">+</button>
+        <button onclick="addTask()" style="background: var(--accent); border: none; border-radius: 12px; padding: 8px 15px; font-weight: bold; color: #020617; cursor: pointer;">+</button>
     </div>
 </div>
 
@@ -132,6 +150,7 @@
     let tasks = JSON.parse(localStorage.getItem('garden_tasks') || '[]');
     let currentPane = 0;
 
+    // --- Core Logic ---
     function save() {
         localStorage.setItem('garden_tasks', JSON.stringify(tasks));
         render();
@@ -147,14 +166,16 @@
             text: input.value,
             priority: prio.value,
             done: false,
-            focus: currentPane === 1 // Add directly to focus if on that screen
+            focus: currentPane === 1 // If user is on Focus screen, add to focus
         });
 
         input.value = '';
         save();
     }
 
-    function handleKey(e) { if(e.key === 'Enter') addTask(); }
+    document.getElementById('taskInput').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') addTask();
+    });
 
     function toggleDone(id) {
         const task = tasks.find(t => t.id === id);
@@ -164,6 +185,7 @@
 
     function toggleFocus(id) {
         const task = tasks.find(t => t.id === id);
+        if (task.done) return;
         task.focus = !task.focus;
         save();
     }
@@ -183,54 +205,89 @@
         Object.values(lists).forEach(l => l.innerHTML = '');
 
         tasks.forEach(t => {
-            const html = `
-                <div class="task-card">
-                    <div class="priority-dot ${t.priority}"></div>
-                    <div class="task-content" onclick="${t.done ? '' : `toggleFocus(${t.id})`}">
-                        <div class="task-title" style="${t.done ? 'text-decoration: line-through; opacity: 0.5' : ''}">${t.text}</div>
-                        <div class="task-meta">${t.done ? 'Finished' : (t.focus ? '★ Focus' : 'Inbox')}</div>
-                    </div>
-                    <div class="check-btn ${t.done ? 'done' : ''}" onclick="toggleDone(${t.id})">
-                        ${t.done ? '✓' : ''}
-                    </div>
-                    ${t.done ? `<button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--red); font-size:1.2rem">&times;</button>` : ''}
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            card.innerHTML = `
+                <div class="priority-dot ${t.priority}"></div>
+                <div class="task-content">
+                    <div class="task-title" style="${t.done ? 'text-decoration: line-through; opacity: 0.5' : ''}">${t.text}</div>
+                    <div class="task-meta">${t.done ? 'Finished' : (t.focus ? '★ Focus' : 'Inbox')}</div>
                 </div>
+                <div class="check-btn ${t.done ? 'done' : ''}">
+                    ${t.done ? '✓' : ''}
+                </div>
+                ${t.done ? `<button class="delete-btn" style="background:none; border:none; color:var(--red); font-size:1.5rem; cursor:pointer;">&times;</button>` : ''}
             `;
 
-            if (t.done) lists.archive.innerHTML += html;
-            else if (t.focus) lists.focus.innerHTML += html;
-            else lists.inbox.innerHTML += html;
+            // Click handlers
+            card.querySelector('.task-content').onclick = () => toggleFocus(t.id);
+            card.querySelector('.check-btn').onclick = (e) => { e.stopPropagation(); toggleDone(t.id); };
+            if (t.done) {
+                card.querySelector('.delete-btn').onclick = (e) => { e.stopPropagation(); deleteTask(t.id); };
+            }
+
+            if (t.done) lists.archive.appendChild(card);
+            else if (t.focus) lists.focus.appendChild(card);
+            else lists.inbox.appendChild(card);
         });
     }
 
-    /* Swipe Logic (from Mind Garden) */
+    // --- Navigation & Swipe Logic ---
     const container = document.getElementById('screen-container');
-    let startX = 0, isDragging = false;
+    let startX = 0, isDragging = false, startTime = 0;
 
-    window.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
+    const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
+
+    function handleStart(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') return;
+        startX = getX(e);
+        startTime = Date.now();
         isDragging = true;
         container.style.transition = 'none';
-    }, {passive: true});
+    }
 
-    window.addEventListener('touchmove', e => {
+    function handleMove(e) {
         if (!isDragging) return;
-        const diff = e.touches[0].clientX - startX;
-        const move = (currentPane * -33.33) + (diff / window.innerWidth * 33.33);
+        const diff = getX(e) - startX;
+        const move = (currentPane * -33.333) + (diff / window.innerWidth * 33.333);
         container.style.transform = `translateX(${move}%)`;
-    }, {passive: true});
+    }
 
-    window.addEventListener('touchend', e => {
+    function handleEnd(e) {
+        if (!isDragging) return;
         isDragging = false;
-        const diff = e.changedTouches[0].clientX - startX;
-        if (Math.abs(diff) > 50) {
+        const diff = (e.changedTouches ? e.changedTouches[0].clientX : e.clientX) - startX;
+        const duration = Date.now() - startTime;
+
+        // Swipe detected if moved > 50px OR fast flick
+        if (Math.abs(diff) > 50 || (Math.abs(diff) > 20 && duration < 250)) {
             if (diff < 0 && currentPane < 2) currentPane++;
             else if (diff > 0 && currentPane > 0) currentPane--;
         }
+        updateLayout();
+    }
+
+    function updateLayout() {
         container.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-        container.style.transform = `translateX(${currentPane * -33.33}%)`;
-        
+        container.style.transform = `translateX(${currentPane * -33.333}%)`;
         document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentPane));
+    }
+
+    // Event Listeners
+    container.addEventListener('touchstart', handleStart, {passive: true});
+    window.addEventListener('touchmove', handleMove, {passive: true});
+    window.addEventListener('touchend', handleEnd);
+
+    container.addEventListener('mousedown', handleStart);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+
+    // Dot navigation
+    document.querySelectorAll('.dot').forEach(dot => {
+        dot.onclick = () => {
+            currentPane = parseInt(dot.dataset.index);
+            updateLayout();
+        };
     });
 
     render();

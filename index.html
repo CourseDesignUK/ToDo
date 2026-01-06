@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <title>Task Garden</title>
     
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#020617">
 
     <style>
         :root {
             --bg: #020617;
-            --card: rgba(30, 41, 59, 0.5);
+            --card: rgba(30, 41, 59, 0.4);
             --muted: #94a3b8;
             --accent: #38bdf8;
             --green: #4ade80;
@@ -27,10 +29,18 @@
             background: var(--bg); color: #fff;
             font-family: -apple-system, system-ui, sans-serif;
             overflow: hidden;
-            user-select: none; /* Prevents text selection during swipes */
+            user-select: none;
         }
 
         body { background: radial-gradient(circle at top right, #0f172a, #020617); }
+
+        /* Garden Progress Bar */
+        #gardenMeter {
+            position: fixed; top: 0; left: 0; height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--accent));
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1000; box-shadow: 0 0 10px var(--green);
+        }
 
         /* Navigation Dots */
         .nav-dots {
@@ -49,13 +59,11 @@
         #screen-container { 
             display: flex; width: 300%; height: 100%; 
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            cursor: grab;
         }
-        #screen-container:active { cursor: grabbing; }
 
         .view { 
             width: 33.3333%; height: 100%; overflow-y: auto; padding: 1.5rem; 
-            padding-top: calc(env(safe-area-inset-top) + 20px); 
+            padding-top: calc(env(safe-area-inset-top) + 40px); 
             padding-bottom: 150px;
         }
 
@@ -66,29 +74,29 @@
             background: var(--card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-radius: 20px; padding: 1rem; margin-bottom: 0.8rem;
             border: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
-            animation: slideIn 0.3s ease-out;
-            transition: transform 0.1s;
+            animation: slideIn 0.3s ease-out; transition: all 0.2s;
         }
-        .task-card:active { transform: scale(0.98); }
+        .task-card:active { transform: scale(0.97); }
 
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .priority-dot { width: 4px; height: 24px; border-radius: 2px; flex-shrink: 0; }
-        .p-high { background: var(--red); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+        .p-high { background: var(--red); box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
         .p-mid { background: var(--yellow); }
         .p-low { background: var(--accent); }
 
         .task-content { flex: 1; cursor: pointer; }
-        .task-title { font-size: 1rem; font-weight: 500; margin-bottom: 2px; word-break: break-word; }
+        .task-title { font-size: 1rem; font-weight: 500; margin-bottom: 2px; }
         .task-meta { font-size: 0.75rem; color: var(--muted); }
 
         .check-btn {
             width: 32px; height: 32px; border-radius: 50%; 
             border: 2px solid var(--border); display: flex; align-items: center; 
             justify-content: center; cursor: pointer; transition: 0.2s;
-            flex-shrink: 0;
         }
-        .check-btn.done { background: var(--green); border-color: var(--green); color: #020617; font-weight: bold; }
+        .check-btn.done { background: var(--green); border-color: var(--green); color: #020617; }
+
+        .empty-state { text-align: center; color: var(--muted); margin-top: 3rem; opacity: 0.5; font-size: 0.9rem; }
 
         /* Input Area */
         .input-bar {
@@ -96,20 +104,18 @@
             left: 1.5rem; right: 1.5rem; z-index: 10;
         }
         .input-box {
-            background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border);
-            border-radius: 20px; padding: 12px 18px; display: flex; gap: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border);
+            border-radius: 20px; padding: 10px 15px; display: flex; gap: 8px;
+            backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
-        input { 
-            background: none; border: none; color: #fff; flex: 1; 
-            outline: none; font-size: 1rem; user-select: text; 
-        }
-        input::placeholder { color: var(--muted); }
-        select { background: none; border: none; color: var(--accent); font-weight: bold; outline: none; cursor: pointer; }
+        input { background: none; border: none; color: #fff; flex: 1; outline: none; font-size: 1rem; user-select: text; }
+        select { background: none; border: none; color: var(--accent); font-weight: bold; outline: none; }
+        .add-btn { background: var(--accent); border: none; border-radius: 12px; width: 40px; height: 40px; font-weight: bold; color: #020617; cursor: pointer; }
     </style>
 </head>
 <body>
+
+<div id="gardenMeter"></div>
 
 <div class="nav-dots">
     <div class="dot active" data-index="0"></div>
@@ -136,13 +142,13 @@
 
 <div class="input-bar">
     <div class="input-box">
-        <input type="text" id="taskInput" placeholder="Add a new task..." autocomplete="off">
+        <input type="text" id="taskInput" placeholder="Sow a new task..." autocomplete="off">
         <select id="priorityInput">
             <option value="p-low">Low</option>
             <option value="p-mid">Mid</option>
             <option value="p-high">High</option>
         </select>
-        <button onclick="addTask()" style="background: var(--accent); border: none; border-radius: 12px; padding: 8px 15px; font-weight: bold; color: #020617; cursor: pointer;">+</button>
+        <button class="add-btn" onclick="addTask()">+</button>
     </div>
 </div>
 
@@ -153,6 +159,7 @@
     // --- Core Logic ---
     function save() {
         localStorage.setItem('garden_tasks', JSON.stringify(tasks));
+        updateGardenGrowth();
         render();
     }
 
@@ -166,16 +173,19 @@
             text: input.value,
             priority: prio.value,
             done: false,
-            focus: currentPane === 1 // If user is on Focus screen, add to focus
+            focus: currentPane === 1
         });
 
         input.value = '';
         save();
     }
 
-    document.getElementById('taskInput').addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') addTask();
-    });
+    function updateGardenGrowth() {
+        const total = tasks.length;
+        const done = tasks.filter(t => t.done).length;
+        const progress = total === 0 ? 0 : (done / total) * 100;
+        document.getElementById('gardenMeter').style.width = `${progress}%`;
+    }
 
     function toggleDone(id) {
         const task = tasks.find(t => t.id === id);
@@ -201,71 +211,71 @@
             focus: document.getElementById('focus-list'),
             archive: document.getElementById('archive-list')
         };
+        const weights = { 'p-high': 1, 'p-mid': 2, 'p-low': 3 };
 
         Object.values(lists).forEach(l => l.innerHTML = '');
 
-        tasks.forEach(t => {
+        const sorted = [...tasks].sort((a,b) => weights[a.priority] - weights[b.priority]);
+
+        sorted.forEach(t => {
             const card = document.createElement('div');
             card.className = 'task-card';
             card.innerHTML = `
                 <div class="priority-dot ${t.priority}"></div>
                 <div class="task-content">
                     <div class="task-title" style="${t.done ? 'text-decoration: line-through; opacity: 0.5' : ''}">${t.text}</div>
-                    <div class="task-meta">${t.done ? 'Finished' : (t.focus ? '★ Focus' : 'Inbox')}</div>
+                    <div class="task-meta">${t.done ? 'Harvested' : (t.focus ? '★ Growing' : 'Seed')}</div>
                 </div>
-                <div class="check-btn ${t.done ? 'done' : ''}">
-                    ${t.done ? '✓' : ''}
-                </div>
-                ${t.done ? `<button class="delete-btn" style="background:none; border:none; color:var(--red); font-size:1.5rem; cursor:pointer;">&times;</button>` : ''}
+                <div class="check-btn ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</div>
+                ${t.done ? `<button onclick="event.stopPropagation(); deleteTask(${t.id})" style="background:none; border:none; color:var(--red); font-size:1.5rem; margin-left:10px;">&times;</button>` : ''}
             `;
-
-            // Click handlers
             card.querySelector('.task-content').onclick = () => toggleFocus(t.id);
             card.querySelector('.check-btn').onclick = (e) => { e.stopPropagation(); toggleDone(t.id); };
-            if (t.done) {
-                card.querySelector('.delete-btn').onclick = (e) => { e.stopPropagation(); deleteTask(t.id); };
-            }
 
             if (t.done) lists.archive.appendChild(card);
             else if (t.focus) lists.focus.appendChild(card);
             else lists.inbox.appendChild(card);
         });
+
+        // Empty states
+        for (let key in lists) {
+            if (lists[key].children.length === 0) {
+                lists[key].innerHTML = `<div class="empty-state">No tasks here...</div>`;
+            }
+        }
     }
 
-    // --- Navigation & Swipe Logic ---
+    // --- Swipe Navigation ---
     const container = document.getElementById('screen-container');
-    let startX = 0, isDragging = false, startTime = 0;
+    let startX = 0, isDragging = false;
 
-    const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
-
-    function handleStart(e) {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') return;
-        startX = getX(e);
-        startTime = Date.now();
+    container.onmousedown = container.ontouchstart = (e) => {
+        if (['INPUT', 'SELECT', 'BUTTON'].includes(e.target.tagName)) return;
         isDragging = true;
+        startX = e.pageX || e.touches[0].pageX;
         container.style.transition = 'none';
-    }
+    };
 
-    function handleMove(e) {
+    window.onmousemove = window.ontouchmove = (e) => {
         if (!isDragging) return;
-        const diff = getX(e) - startX;
+        const x = e.pageX || e.touches[0].pageX;
+        const diff = x - startX;
         const move = (currentPane * -33.333) + (diff / window.innerWidth * 33.333);
         container.style.transform = `translateX(${move}%)`;
-    }
+    };
 
-    function handleEnd(e) {
+    window.onmouseup = window.ontouchend = (e) => {
         if (!isDragging) return;
         isDragging = false;
-        const diff = (e.changedTouches ? e.changedTouches[0].clientX : e.clientX) - startX;
-        const duration = Date.now() - startTime;
+        const x = e.pageX || (e.changedTouches ? e.changedTouches[0].pageX : startX);
+        const diff = x - startX;
 
-        // Swipe detected if moved > 50px OR fast flick
-        if (Math.abs(diff) > 50 || (Math.abs(diff) > 20 && duration < 250)) {
+        if (Math.abs(diff) > 50) {
             if (diff < 0 && currentPane < 2) currentPane++;
             else if (diff > 0 && currentPane > 0) currentPane--;
         }
         updateLayout();
-    }
+    };
 
     function updateLayout() {
         container.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -273,23 +283,16 @@
         document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentPane));
     }
 
-    // Event Listeners
-    container.addEventListener('touchstart', handleStart, {passive: true});
-    window.addEventListener('touchmove', handleMove, {passive: true});
-    window.addEventListener('touchend', handleEnd);
-
-    container.addEventListener('mousedown', handleStart);
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleEnd);
-
-    // Dot navigation
     document.querySelectorAll('.dot').forEach(dot => {
-        dot.onclick = () => {
-            currentPane = parseInt(dot.dataset.index);
-            updateLayout();
-        };
+        dot.onclick = () => { currentPane = parseInt(dot.dataset.index); updateLayout(); };
     });
 
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    updateGardenGrowth();
     render();
 </script>
 </body>

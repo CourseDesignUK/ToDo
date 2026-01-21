@@ -48,19 +48,11 @@
             padding-bottom: 240px;
         }
 
-        .sound-toggle {
-            background: var(--card); border: 1px solid var(--border);
-            padding: 10px 18px; border-radius: 15px; font-size: 0.9rem;
-            display: flex; align-items: center; gap: 10px; cursor: pointer;
-            width: fit-content; margin-bottom: 12px; transition: 0.2s;
-        }
-        .sound-active { border-color: var(--green); color: var(--green); background: rgba(74, 222, 128, 0.1); }
-
         /* Task Cards */
         .task-card {
             background: var(--card); backdrop-filter: blur(12px);
             border-radius: 20px; padding: 1.2rem; margin-bottom: 1rem;
-            border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--border); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
         .ping-flash {
@@ -69,26 +61,25 @@
             transform: scale(1.02);
         }
 
-        .growth-stage { cursor: pointer; font-size: 1.6rem; margin-right: 12px; display: inline-block; }
-        
-        /* Step Controls */
+        .growth-stage-icon { font-size: 2rem; margin-right: 15px; display: inline-block; cursor: pointer; transition: transform 0.2s; }
+        .growth-stage-icon:active { transform: scale(1.2); }
+
         .growth-controls { 
             width: 100%; display: flex; align-items: center; justify-content: space-between; 
-            margin-top: 15px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 12px;
+            margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 15px;
         }
         .step-btn {
             background: rgba(255,255,255,0.1); border: none; color: #fff;
-            width: 36px; height: 36px; border-radius: 10px; font-size: 1.2rem;
+            width: 40px; height: 40px; border-radius: 12px; font-size: 1.4rem;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        .step-btn:active { background: var(--accent); color: var(--bg); }
-        .progress-label { font-size: 0.85rem; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+        .step-btn:disabled { opacity: 0.2; cursor: default; }
 
-        .input-bar { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 65px); left: 1.5rem; right: 1.5rem; z-index: 10; }
+        .progress-label { font-size: 0.9rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+        .input-bar { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 70px); left: 1.5rem; right: 1.5rem; z-index: 10; }
         .input-box { background: rgba(15, 23, 42, 0.95); border-radius: 20px; padding: 10px 15px; display: flex; gap: 8px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
         input[type="text"] { background: none; border: none; color: #fff; flex: 1; outline: none; font-size: 1rem; }
-
-        .btn-small { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); padding: 10px 14px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -103,11 +94,11 @@
 <div id="screen-container">
     <div class="view">
         <h2 style="color: var(--accent)">Mindful Space</h2>
-        <div class="sound-toggle" id="stormBtn" onclick="toggleSound('storm')">⚡ Storm</div>
-        <div class="sound-toggle" id="birdsBtn" onclick="toggleSound('birds')">🐦 Birdsong</div>
-        <div style="text-align: center; margin-top: 40px;">
-            <div style="font-size: 3rem; font-weight: 800;" id="timeDisplay">25:00</div>
-            <button onclick="toggleTimer()" id="timerBtn" style="margin-top:20px; background:var(--accent); color:var(--bg); border:none; padding:12px 30px; border-radius:25px; font-weight:bold;">Start Focus</button>
+        <div class="sound-toggle" id="stormBtn" onclick="toggleSound('storm')" style="cursor:pointer; margin-bottom:10px;">⚡ Storm</div>
+        <div class="sound-toggle" id="birdsBtn" onclick="toggleSound('birds')" style="cursor:pointer;">🐦 Birdsong</div>
+        <div style="text-align: center; margin-top: 50px;">
+            <div style="font-size: 3.5rem; font-weight: 800;" id="timeDisplay">25:00</div>
+            <button onclick="toggleTimer()" id="timerBtn" style="margin-top:25px; background:var(--accent); color:var(--bg); border:none; padding:15px 40px; border-radius:30px; font-weight:bold;">Start Focus</button>
         </div>
     </div>
 
@@ -118,9 +109,7 @@
         <h2 style="color: var(--muted)">Harvested</h2>
         <div id="archive-list"></div>
         <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; gap: 10px;">
-            <button class="btn-small" onclick="exportToCSV()">📤 Export</button>
-            <button class="btn-small" onclick="document.getElementById('csvInput').click()">📥 Import</button>
-            <input type="file" id="csvInput" style="display:none" accept=".csv" onchange="importFromCSV(event)">
+            <button onclick="exportToCSV()" style="background:none; border:1px solid var(--border); color:var(--muted); padding:10px; border-radius:10px; font-size:0.8rem;">📤 Export CSV</button>
         </div>
     </div>
 </div>
@@ -128,7 +117,7 @@
 <div class="input-bar">
     <div class="input-box">
         <input type="text" id="taskInput" placeholder="Sow a seed..." autocomplete="off">
-        <button onclick="addTask()" style="background:var(--accent); border:none; border-radius:12px; width:40px; height:40px; color:#020617; font-weight:bold;">+</button>
+        <button onclick="addTask()" style="background:var(--accent); border:none; border-radius:12px; width:44px; height:44px; color:#020617; font-weight:bold; font-size:1.2rem;">+</button>
     </div>
 </div>
 
@@ -142,27 +131,38 @@
     let timerSeconds = 25 * 60;
     let timerInterval = null;
 
+    const growthIcons = {
+        0: '🫘',
+        25: '🌱',
+        50: '🌿',
+        75: '🪴',
+        100: '🌳'
+    };
+
     function save() {
         localStorage.setItem('garden_tasks', JSON.stringify(tasks));
         render();
     }
 
-    function adjustProgress(id, amount, btnElement) {
+    function adjustProgress(id, direction, btnElement) {
         const task = tasks.find(t => t.id === id);
-        const oldVal = task.progress;
-        let newVal = oldVal + amount;
+        const stages = [0, 25, 50, 75, 100];
+        let currentIndex = stages.indexOf(task.progress);
         
-        // Clamp between 0 and 100
-        newVal = Math.max(0, Math.min(100, newVal));
-        
-        if (newVal === 100 && oldVal < 100) {
-            task.progress = 100;
-            task.done = true;
-            triggerPing(btnElement);
-        } else {
+        let nextIndex = currentIndex + direction;
+        if (nextIndex >= 0 && nextIndex < stages.length) {
+            const oldVal = task.progress;
+            const newVal = stages[nextIndex];
+            
             task.progress = newVal;
-            task.done = (newVal === 100);
-            save();
+            
+            if (newVal === 100 && oldVal < 100) {
+                task.done = true;
+                triggerPing(btnElement);
+            } else {
+                task.done = (newVal === 100);
+                save();
+            }
         }
     }
 
@@ -175,7 +175,7 @@
         card.classList.add('ping-flash');
         
         setTimeout(() => {
-            save(); // Re-renders and moves card
+            save(); 
         }, 500);
     }
 
@@ -188,17 +188,17 @@
             card.className = 'task-card';
             card.innerHTML = `
                 <div style="display:flex; align-items:center;">
-                    <span class="growth-stage" onclick="toggleFocus(${t.id})">${t.done ? '🌳' : (t.focus ? '⭐' : '🌱')}</span>
+                    <span class="growth-stage-icon" onclick="toggleFocus(${t.id})">${t.done ? '🌳' : (t.focus && t.progress < 100 ? '⭐' : growthIcons[t.progress])}</span>
                     <div style="flex:1; ${t.done ? 'opacity:0.4; text-decoration:line-through;' : ''}">
-                        <div style="font-weight:600;">${t.text}</div>
+                        <div style="font-weight:600; font-size:1.1rem;">${t.text}</div>
                     </div>
-                    <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--red); font-size:1.2rem;">&times;</button>
+                    <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--red); font-size:1.5rem; padding:5px;">&times;</button>
                 </div>
                 ${!t.done ? `
                 <div class="growth-controls">
-                    <button class="step-btn" onclick="adjustProgress(${t.id}, -25, this)">−</button>
+                    <button class="step-btn" onclick="adjustProgress(${t.id}, -1, this)" ${t.progress === 0 ? 'disabled' : ''}>−</button>
                     <div class="progress-label">${t.progress}%</div>
-                    <button class="step-btn" onclick="adjustProgress(${t.id}, 25, this)">+</button>
+                    <button class="step-btn" onclick="adjustProgress(${t.id}, 1, this)" ${t.progress === 100 ? 'disabled' : ''}>+</button>
                 </div>` : ''}
             `;
             if (t.done) lists.archive.appendChild(card);
@@ -207,7 +207,6 @@
         });
     }
 
-    // --- Standard Helpers ---
     function toggleFocus(id) { 
         const t = tasks.find(x => x.id === id); 
         if(!t.done) { t.focus = !t.focus; save(); } 
@@ -224,8 +223,7 @@
 
     function toggleSound(type) {
         const a = document.getElementById(type + 'Audio');
-        const b = document.getElementById(type + 'Btn');
-        a.paused ? (a.play(), b.classList.add('sound-active')) : (a.pause(), b.classList.remove('sound-active'));
+        a.paused ? a.play() : a.pause();
     }
 
     function toggleTimer() {
@@ -243,11 +241,11 @@
         }
     }
 
-    // --- Navigation ---
+    // --- Navigation logic ---
     const container = document.getElementById('screen-container');
     let startX = 0, isDragging = false;
     container.ontouchstart = (e) => {
-        if (['BUTTON', 'INPUT', 'SELECT'].includes(e.target.tagName)) return;
+        if (['BUTTON', 'INPUT'].includes(e.target.tagName)) return;
         isDragging = true; startX = e.touches[0].pageX; container.style.transition = 'none';
     };
     window.ontouchmove = (e) => { if (!isDragging) return; const diff = e.touches[0].pageX - startX; const move = (currentPane * -25) + (diff / window.innerWidth * 25); container.style.transform = `translateX(${move}%)`; };

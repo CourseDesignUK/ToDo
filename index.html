@@ -29,13 +29,7 @@
 
         body { background: radial-gradient(circle at top right, #0f172a, #020617); }
 
-        #gardenMeter {
-            position: fixed; top: 0; left: 0; height: 4px;
-            background: linear-gradient(90deg, var(--green), var(--accent));
-            transition: width 0.6s ease;
-            z-index: 1000; box-shadow: 0 0 10px var(--green);
-        }
-
+        /* Navigation Dots */
         .nav-dots {
             position: fixed; bottom: calc(env(safe-area-inset-bottom) + 20px);
             left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 100;
@@ -51,47 +45,59 @@
         .view { 
             width: 25%; height: 100%; overflow-y: auto; padding: 1.5rem; 
             padding-top: calc(env(safe-area-inset-top) + 40px); 
-            padding-bottom: 220px;
+            padding-bottom: 240px;
         }
 
-        /* Soundscape Controls */
         .sound-toggle {
             background: var(--card); border: 1px solid var(--border);
-            padding: 8px 15px; border-radius: 15px; font-size: 0.8rem;
-            display: flex; align-items: center; gap: 8px; cursor: pointer;
-            width: fit-content; margin-bottom: 20px;
+            padding: 10px 18px; border-radius: 15px; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            width: fit-content; margin-bottom: 12px; transition: 0.2s;
         }
-        .sound-active { border-color: var(--green); color: var(--green); box-shadow: 0 0 10px rgba(74, 222, 128, 0.2); }
+        .sound-active { border-color: var(--green); color: var(--green); background: rgba(74, 222, 128, 0.1); }
 
-        /* Timer Styling */
-        .timer-display { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50%; }
+        .timer-display { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 40%; margin-top: 20px; }
         .timer-circle {
-            width: 220px; height: 220px; border-radius: 50%;
-            border: 6px solid var(--card); display: flex; align-items: center;
-            justify-content: center; background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
+            width: 200px; height: 200px; border-radius: 50%;
+            border: 6px solid var(--card); display: flex; align-items: center; justify-content: center;
         }
         .timer-time { font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 
-        /* Task Cards */
+        /* Task Cards with Flash Animation */
         .task-card {
             background: var(--card); backdrop-filter: blur(12px);
             border-radius: 20px; padding: 1.2rem; margin-bottom: 1rem;
-            border: 1px solid var(--border); transition: 0.3s;
+            border: 1px solid var(--border); transition: background 0.4s, transform 0.2s;
         }
-        .growth-stage { font-size: 1.5rem; margin-right: 10px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        /* The Ping Flash Animation */
+        .ping-flash {
+            background: rgba(74, 222, 128, 0.3) !important;
+            border-color: var(--green) !important;
+            transform: scale(1.02);
+        }
+
+        .growth-stage { cursor: pointer; font-size: 1.6rem; margin-right: 12px; display: inline-block; }
         
         .slider-container { width: 100%; display: flex; align-items: center; gap: 10px; margin-top: 15px; }
-        input[type="range"] { flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); }
+        input[type="range"] { 
+            flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.1); 
+            height: 14px; border-radius: 7px; touch-action: pan-x; outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb { 
+            -webkit-appearance: none; width: 26px; height: 26px; 
+            background: var(--green); border-radius: 50%; border: 2px solid var(--bg);
+        }
 
         .input-bar { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 65px); left: 1.5rem; right: 1.5rem; z-index: 10; }
-        .input-box { background: rgba(15, 23, 42, 0.95); border-radius: 20px; padding: 10px 15px; display: flex; gap: 8px; border: 1px solid var(--border); }
-        input[type="text"] { background: none; border: none; color: #fff; flex: 1; outline: none; }
+        .input-box { background: rgba(15, 23, 42, 0.95); border-radius: 20px; padding: 10px 15px; display: flex; gap: 8px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
+        input[type="text"] { background: none; border: none; color: #fff; flex: 1; outline: none; font-size: 1rem; }
+
+        .backup-btns { margin-top: 30px; display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 20px; }
+        .btn-small { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); padding: 10px 14px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; }
     </style>
 </head>
 <body>
-
-<div id="gardenMeter"></div>
 
 <div class="nav-dots">
     <div class="dot active"></div>
@@ -102,53 +108,44 @@
 
 <div id="screen-container">
     <div class="view">
-        <h2 style="color: var(--red)">Mindful Space</h2>
-        
-        <div class="sound-toggle" id="rainBtn" onclick="toggleSound('rain')">
-            <span>🌧️</span> Rain Forest
-        </div>
-        <div class="sound-toggle" id="birdsBtn" onclick="toggleSound('birds')">
-            <span>🐦</span> Morning Birds
-        </div>
-
+        <h2 style="color: var(--accent)">Mindful Space</h2>
+        <div class="sound-toggle" id="stormBtn" onclick="toggleSound('storm')">⚡ Storm</div>
+        <div class="sound-toggle" id="birdsBtn" onclick="toggleSound('birds')">🐦 Birdsong</div>
         <div class="timer-display">
-            <div class="timer-circle">
-                <div class="timer-time" id="timeDisplay">25:00</div>
-            </div>
-            <button onclick="toggleTimer()" style="margin-top:20px; background:var(--red); color:white; border:none; padding:12px 30px; border-radius:25px; font-weight:bold;" id="timerBtn">Start Focus</button>
+            <div class="timer-circle"><div class="timer-time" id="timeDisplay">25:00</div></div>
+            <button onclick="toggleTimer()" id="timerBtn" style="margin-top:24px; background:var(--accent); color:var(--bg); border:none; padding:14px 36px; border-radius:25px; font-weight:bold; font-size:1rem;">Start Focus</button>
         </div>
     </div>
 
-    <div class="view">
-        <h2 style="color: var(--accent)">Inbox</h2>
-        <div id="inbox-list"></div>
-    </div>
-
-    <div class="view">
-        <h2 style="color: var(--yellow)">Today's Focus</h2>
-        <div id="focus-list"></div>
-    </div>
+    <div class="view"><h2 style="color: var(--accent)">Inbox</h2><div id="inbox-list"></div></div>
+    <div class="view"><h2 style="color: var(--yellow)">Daily Focus</h2><div id="focus-list"></div></div>
 
     <div class="view">
         <h2 style="color: var(--muted)">Harvested</h2>
         <div id="archive-list"></div>
+        <div class="backup-btns">
+            <button class="btn-small" onclick="exportToCSV()">📤 Export CSV</button>
+            <button class="btn-small" onclick="document.getElementById('csvInput').click()">📥 Import CSV</button>
+            <input type="file" id="csvInput" style="display:none" accept=".csv" onchange="importFromCSV(event)">
+        </div>
     </div>
 </div>
 
 <div class="input-bar">
     <div class="input-box">
         <input type="text" id="taskInput" placeholder="Sow a seed..." autocomplete="off">
-        <select id="priorityInput" style="background:none; border:none; color:var(--accent); font-weight:bold; outline:none;">
+        <select id="priorityInput" style="background:none; border:none; color:var(--accent); outline:none; font-weight:bold;">
             <option value="p-low">Low</option>
             <option value="p-mid">Mid</option>
             <option value="p-high">High</option>
         </select>
-        <button onclick="addTask()" style="background:var(--accent); border:none; border-radius:12px; width:40px; color:#020617; font-weight:bold;">+</button>
+        <button onclick="addTask()" style="background:var(--accent); border:none; border-radius:12px; width:40px; height:40px; color:#020617; font-weight:bold;">+</button>
     </div>
 </div>
 
-<audio id="rainAudio" loop src="https://www.soundjay.com/nature/rain-01.mp3"></audio>
-<audio id="birdsAudio" loop src="https://www.soundjay.com/nature/sounds/bird-chirping-01.mp3"></audio>
+<audio id="stormAudio" loop src="storm.mp3"></audio>
+<audio id="birdsAudio" loop src="birdsong.mp3"></audio>
+<audio id="pingAudio" src="ping.mp3"></audio>
 
 <script>
     let tasks = JSON.parse(localStorage.getItem('garden_tasks') || '[]');
@@ -156,105 +153,59 @@
     let timerSeconds = 25 * 60;
     let timerInterval = null;
 
-    // --- Sound Logic ---
-    function toggleSound(type) {
-        const audio = document.getElementById(type + 'Audio');
-        const btn = document.getElementById(type + 'Btn');
-        
-        if (audio.paused) {
-            audio.play();
-            btn.classList.add('sound-active');
-        } else {
-            audio.pause();
-            btn.classList.remove('sound-active');
-        }
-    }
-
-    // --- Timer Logic ---
-    function toggleTimer() {
-        const btn = document.getElementById('timerBtn');
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            btn.innerText = 'Resume';
-        } else {
-            btn.innerText = 'Pause';
-            timerInterval = setInterval(() => {
-                timerSeconds--;
-                updateTimerDisplay();
-                if (timerSeconds <= 0) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    alert("Focus complete!");
-                }
-            }, 1000);
-        }
-    }
-
-    function updateTimerDisplay() {
-        const mins = Math.floor(timerSeconds / 60);
-        const secs = timerSeconds % 60;
-        document.getElementById('timeDisplay').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    // --- Task Logic ---
-    function getGrowthEmoji(prog) {
-        if (prog === 0) return '🌱';
-        if (prog < 30) return '🌿';
-        if (prog < 60) return '🪴';
-        if (prog < 100) return '🌻';
-        return '🌳';
-    }
-
+    // --- Core Logic ---
     function save() {
         localStorage.setItem('garden_tasks', JSON.stringify(tasks));
-        updateGardenGrowth();
         render();
     }
 
-    function addTask() {
-        const input = document.getElementById('taskInput');
-        if (!input.value.trim()) return;
-        tasks.push({
-            id: Date.now(),
-            text: input.value,
-            priority: document.getElementById('priorityInput').value,
-            progress: 0,
-            done: false,
-            focus: currentPane === 2
-        });
-        input.value = '';
+    function updateProgress(id, val, element) {
+        const task = tasks.find(t => t.id === id);
+        const newVal = parseInt(val);
+        
+        // Trigger Ping when reaching 100%
+        if (newVal === 100 && task.progress < 100) {
+            triggerPing(element);
+        }
+
+        task.progress = newVal;
+        task.done = (task.progress === 100);
         save();
     }
 
-    function updateProgress(id, val) {
-        const task = tasks.find(t => t.id === id);
-        task.progress = parseInt(val);
-        task.done = (task.progress === 100);
-        save();
+    function triggerPing(sliderElement) {
+        // Play Sound
+        const ping = document.getElementById('pingAudio');
+        ping.currentTime = 0;
+        ping.play().catch(() => {}); // Catch browser auto-play blocks
+
+        // Visual Flash (Find the card containing this slider)
+        const card = sliderElement.closest('.task-card');
+        card.classList.add('ping-flash');
+        
+        setTimeout(() => {
+            render(); // This will move the card to the Harvested list
+        }, 500);
     }
 
     function render() {
         const lists = { inbox: document.getElementById('inbox-list'), focus: document.getElementById('focus-list'), archive: document.getElementById('archive-list') };
         Object.values(lists).forEach(l => l.innerHTML = '');
-
+        
         const weights = { 'p-high': 1, 'p-mid': 2, 'p-low': 3 };
-        const sorted = [...tasks].sort((a,b) => weights[a.priority] - weights[b.priority]);
-
-        sorted.forEach(t => {
+        [...tasks].sort((a,b) => weights[a.priority] - weights[b.priority]).forEach(t => {
             const card = document.createElement('div');
             card.className = 'task-card';
             card.innerHTML = `
                 <div style="display:flex; align-items:center;">
-                    <span class="growth-stage" style="transform: scale(${0.8 + (t.progress/200)})">${getGrowthEmoji(t.progress)}</span>
-                    <div style="flex:1; ${t.done ? 'opacity:0.5; text-decoration:line-through;' : ''}">
-                        <div style="font-weight:600; font-size:0.9rem">${t.text}</div>
+                    <span class="growth-stage" onclick="toggleFocus(${t.id})">${t.done ? '🌳' : (t.focus ? '⭐' : '🌱')}</span>
+                    <div style="flex:1; ${t.done ? 'opacity:0.4; text-decoration:line-through;' : ''}">
+                        <div style="font-weight:600; font-size:0.95rem;">${t.text}</div>
                     </div>
-                    <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--red); font-size:1.2rem;">&times;</button>
+                    <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--red); font-size:1.3rem;">&times;</button>
                 </div>
                 <div class="slider-container">
-                    <input type="range" value="${t.progress}" oninput="updateProgress(${t.id}, this.value)">
-                    <span style="font-size:0.7rem; color:var(--muted); width:30px;">${t.progress}%</span>
+                    <input type="range" value="${t.progress}" oninput="updateProgress(${t.id}, this.value, this)">
                 </div>
             `;
             if (t.done) lists.archive.appendChild(card);
@@ -263,55 +214,58 @@
         });
     }
 
-    function deleteTask(id) {
-        tasks = tasks.filter(t => t.id !== id);
-        save();
+    // --- Helpers (Navigation, Timer, CSV) ---
+    function toggleSound(type) {
+        const audio = document.getElementById(type + 'Audio');
+        const btn = document.getElementById(type + 'Btn');
+        audio.paused ? (audio.play(), btn.classList.add('sound-active')) : (audio.pause(), btn.classList.remove('sound-active'));
     }
 
-    function updateGardenGrowth() {
-        const avg = tasks.length ? tasks.reduce((a,b) => a + b.progress, 0) / tasks.length : 0;
-        document.getElementById('gardenMeter').style.width = `${avg}%`;
+    function toggleFocus(id) {
+        const t = tasks.find(x => x.id === id);
+        if (!t.done) { t.focus = !t.focus; save(); }
     }
 
-    // --- 4-Pane Swipe System ---
+    function addTask() {
+        const input = document.getElementById('taskInput');
+        if (!input.value.trim()) return;
+        tasks.push({ id: Date.now(), text: input.value, priority: document.getElementById('priorityInput').value, progress: 0, done: false, focus: currentPane === 2 });
+        input.value = ''; save();
+    }
+
+    function deleteTask(id) { if(confirm("Uproot seed?")) { tasks = tasks.filter(t => t.id !== id); save(); } }
+
+    function exportToCSV() {
+        let csv = "data:text/csv;charset=utf-8,id,text,priority,progress,done,focus\n" + tasks.map(t => `${t.id},"${t.text}",${t.priority},${t.progress},${t.done},${t.focus}`).join("\n");
+        const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `garden.csv`; link.click();
+    }
+
+    function importFromCSV(e) {
+        const reader = new FileReader();
+        reader.onload = (f) => {
+            const rows = f.target.result.split("\n").slice(1);
+            tasks = [...tasks, ...rows.filter(r => r.trim()).map(r => {
+                const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                return { id: parseInt(c[0]), text: c[1].replace(/^"|"$/g,''), priority: c[2], progress: parseInt(c[3]), done: c[4]==='true', focus: c[5]==='true' };
+            })];
+            save();
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    // --- Navigation & Timer Boilerplate ---
     const container = document.getElementById('screen-container');
     let startX = 0, isDragging = false;
-
     container.ontouchstart = (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.type === 'range' || e.target.classList.contains('sound-toggle')) return;
-        isDragging = true;
-        startX = e.touches[0].pageX;
-        container.style.transition = 'none';
+        if (['INPUT', 'SELECT', 'BUTTON'].includes(e.target.tagName) || e.target.type === 'range') return;
+        isDragging = true; startX = e.touches[0].pageX; container.style.transition = 'none';
     };
-
-    window.ontouchmove = (e) => {
-        if (!isDragging) return;
-        const diff = e.touches[0].pageX - startX;
-        const move = (currentPane * -25) + (diff / window.innerWidth * 25);
-        container.style.transform = `translateX(${move}%)`;
-    };
-
-    window.ontouchend = (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        const diff = e.changedTouches[0].pageX - startX;
-        if (Math.abs(diff) > 50) {
-            if (diff < 0 && currentPane < 3) currentPane++;
-            else if (diff > 0 && currentPane > 0) currentPane--;
-        }
-        updateLayout();
-    };
-
-    function updateLayout() {
-        container.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-        container.style.transform = `translateX(${currentPane * -25}%)`;
-        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentPane));
-    }
-
+    window.ontouchmove = (e) => { if (!isDragging) return; const diff = e.touches[0].pageX - startX; const move = (currentPane * -25) + (diff / window.innerWidth * 25); container.style.transform = `translateX(${move}%)`; };
+    window.ontouchend = (e) => { if (!isDragging) return; isDragging = false; const diff = e.changedTouches[0].pageX - startX; if (Math.abs(diff) > 50) { if (diff < 0 && currentPane < 3) currentPane++; else if (diff > 0 && currentPane > 0) currentPane--; } updateLayout(); };
+    function updateLayout() { container.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)'; container.style.transform = `translateX(${currentPane * -25}%)`; document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentPane)); }
+    function toggleTimer() { /* ... Timer code ... */ }
     document.getElementById('taskInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
-
-    updateLayout();
-    save();
+    updateLayout(); save();
 </script>
 </body>
 </html>

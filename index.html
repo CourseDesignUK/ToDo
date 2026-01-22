@@ -62,15 +62,6 @@
             padding-top: calc(env(safe-area-inset-top) + 40px); padding-bottom: 240px;
         }
 
-        /* Audio Screen Buttons */
-        .sound-toggle {
-            background: var(--card); border: 1px solid var(--border);
-            padding: 12px 20px; border-radius: 15px; font-size: 0.95rem;
-            display: flex; align-items: center; gap: 10px; cursor: pointer;
-            width: fit-content; margin-bottom: 15px; transition: 0.2s;
-        }
-        .sound-active { border-color: var(--green); color: var(--green); background: rgba(74, 222, 128, 0.1); }
-
         /* Task Cards */
         .task-card {
             background: var(--card); backdrop-filter: blur(12px);
@@ -94,7 +85,7 @@
         .input-box { background: rgba(15, 23, 42, 0.95); border-radius: 20px; padding: 10px 15px; display: flex; gap: 8px; border: 1px solid var(--border); }
         input[type="text"] { background: none; border: none; color: #fff; flex: 1; outline: none; }
         
-        .btn-small { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); padding: 10px 14px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; }
+        .sound-toggle { margin-bottom: 10px; padding: 10px; background: var(--card); border-radius: 10px; cursor: pointer; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -111,8 +102,8 @@
 <div id="screen-container">
     <div class="view">
         <h2 style="color: var(--accent)">Mindful Space</h2>
-        <div class="sound-toggle" id="stormBtn" onclick="toggleSound('storm')">⚡ Storm</div>
-        <div class="sound-toggle" id="birdsBtn" onclick="toggleSound('birds')">🐦 Birdsong</div>
+        <div class="sound-toggle" onclick="toggleSound('storm')">⚡ Storm</div>
+        <div class="sound-toggle" onclick="toggleSound('birds')">🐦 Birdsong</div>
         <div style="text-align: center; margin-top: 50px;">
             <div style="font-size: 3.5rem; font-weight: 800;" id="timeDisplay">25:00</div>
             <button onclick="toggleTimer()" id="timerBtn" style="margin-top:25px; background:var(--accent); color:var(--bg); border:none; padding:15px 40px; border-radius:30px; font-weight:bold;">Start Focus</button>
@@ -124,9 +115,7 @@
         <h2 style="color: var(--muted)">Harvested</h2>
         <div id="archive-list"></div>
         <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; gap: 10px;">
-            <button class="btn-small" onclick="exportToCSV()">📤 Export CSV</button>
-            <button class="btn-small" onclick="document.getElementById('csvInput').click()">📥 Import CSV</button>
-            <input type="file" id="csvInput" style="display:none" accept=".csv" onchange="importFromCSV(event)">
+            <button onclick="exportToCSV()" style="background:none; border:1px solid var(--border); color:var(--muted); padding:10px; border-radius:10px; font-size:0.8rem;">📤 Export CSV</button>
         </div>
     </div>
 </div>
@@ -144,31 +133,31 @@
 
 <script>
     const quotes = [
-        { q: "Life is about making an impact, not making an income.", a: "Kevin Kruse" }, [cite: 1]
-        { q: "Whatever the mind of man can conceive and believe, it can achieve.", a: "Napoleon Hill" }, [cite: 2]
-        { q: "Strive not to be a success, but rather to be of value.", a: "Albert Einstein" }, [cite: 3]
-        { q: "Two roads diverged in a wood, and I—I took the one less traveled by, And that has made all the difference.", a: "Robert Frost" }, [cite: 4]
-        { q: "I attribute my success to this: I never gave or took any excuse.", a: "Florence Nightingale" }, [cite: 5]
-        { q: "You miss 100% of the shots you don’t take.", a: "Wayne Gretzky" }, [cite: 6]
+        { q: "Life is about making an impact, not making an income.", a: "Kevin Kruse" },
+        { q: "Whatever the mind of man can conceive and believe, it can achieve.", a: "Napoleon Hill" },
+        { q: "Strive not to be a success, but rather to be of value.", a: "Albert Einstein" },
+        { q: "Two roads diverged in a wood, and I—I took the one less traveled by, And that has made all the difference.", a: "Robert Frost" },
+        { q: "I attribute my success to this: I never gave or took any excuse.", a: "Florence Nightingale" },
+        { q: "You miss 100% of the shots you don’t take.", a: "Wayne Gretzky" },
         { q: "I've missed more than 9000 shots in my career. I've lost almost 300 games. 26 times I've been trusted to take the game winning shot and missed. I've failed over and over and over again in my life. And that is why I succeed.", a: "Michael Jordan" },
-        { q: "The most difficult thing is the decision to act, the rest is merely tenacity.", a: "Amelia Earhart" }, [cite: 8]
-        { q: "Every strike brings me closer to the next home run.", a: "Babe Ruth" }, [cite: 9]
-        { q: "Definiteness of purpose is the starting point of all achievement.", a: "W. Clement Stone" }, [cite: 10]
-        { q: "Life isn't about getting and having, it's about giving and being.", a: "Kevin Kruse" }, [cite: 11]
-        { q: "Life is what happens to you while you’re busy making other plans.", a: "John Lennon" }, [cite: 12]
-        { q: "We become what we think about.", a: "Earl Nightingale" }, [cite: 13]
-        { q: "Twenty years from now you will be more disappointed by the things that you didn’t do than by the ones you did do, so throw off the bowlines, sail away from safe harbor, catch the trade winds in your sails. Explore, Dream, Discover.", a: "Mark Twain" }, [cite: 14]
-        { q: "Life is 10% what happens to me and 90% of how I react to it.", a: "Charles Swindoll" }, [cite: 15]
-        { q: "The most common way people give up their power is by thinking they don’t have any.", a: "Alice Walker" }, [cite: 16]
-        { q: "The mind is everything. What you think you become.", a: "Buddha" }, [cite: 17]
-        { q: "The best time to plant a tree was 20 years ago. The second best time is now.", a: "Chinese Proverb" }, [cite: 18]
-        { q: "An unexamined life is not worth living.", a: "Socrates" }, [cite: 19]
-        { q: "Eighty percent of success is showing up.", a: "Woody Allen" }, [cite: 20]
-        { q: "Your time is limited, so don’t waste it living someone else’s life.", a: "Steve Jobs" }, [cite: 21]
-        { q: "Winning isn’t everything, but wanting to win is.", a: "Vince Lombardi" }, [cite: 22]
-        { q: "I am not a product of my circumstances. I am a product of my decisions.", a: "Stephen Covey" }, [cite: 23]
-        { q: "Every child is an artist. The problem is how to remain an artist once he grows up.", a: "Pablo Picasso" }, [cite: 24]
-        { q: "You can never cross the ocean until you have the courage to lose sight of the shore.", a: "Christopher Columbus" }, [cite: 25]
+        { q: "The most difficult thing is the decision to act, the rest is merely tenacity.", a: "Amelia Earhart" },
+        { q: "Every strike brings me closer to the next home run.", a: "Babe Ruth" },
+        { q: "Definiteness of purpose is the starting point of all achievement.", a: "W. Clement Stone" },
+        { q: "Life isn't about getting and having, it's about giving and being.", a: "Kevin Kruse" },
+        { q: "Life is what happens to you while you’re busy making other plans.", a: "John Lennon" },
+        { q: "We become what we think about.", a: "Earl Nightingale" },
+        { q: "Twenty years from now you will be more disappointed by the things that you didn’t do than by the ones you did do, so throw off the bowlines, sail away from safe harbor, catch the trade winds in your sails. Explore, Dream, Discover.", a: "Mark Twain" },
+        { q: "Life is 10% what happens to me and 90% of how I react to it.", a: "Charles Swindoll" },
+        { q: "The most common way people give up their power is by thinking they don’t have any.", a: "Alice Walker" },
+        { q: "The mind is everything. What you think you become.", a: "Buddha" },
+        { q: "The best time to plant a tree was 20 years ago. The second best time is now.", a: "Chinese Proverb" },
+        { q: "An unexamined life is not worth living.", a: "Socrates" },
+        { q: "Eighty percent of success is showing up.", a: "Woody Allen" },
+        { q: "Your time is limited, so don’t waste it living someone else’s life.", a: "Steve Jobs" },
+        { q: "Winning isn’t everything, but wanting to win is.", a: "Vince Lombardi" },
+        { q: "I am not a product of my circumstances. I am a product of my decisions.", a: "Stephen Covey" },
+        { q: "Every child is an artist. The problem is how to remain an artist once he grows up.", a: "Pablo Picasso" },
+        { q: "You can never cross the ocean until you have the courage to lose sight of the shore.", a: "Christopher Columbus" },
         { q: "I’ve learned that people will forget what you said, people will forget what you did, but people will never forget how you made them feel.", a: "Maya Angelou" },
         { q: "Either you run the day, or the day runs you.", a: "Jim Rohn" },
         { q: "Whether you think you can or you think you can’t, you’re right.", a: "Henry Ford" },
@@ -316,13 +305,7 @@
         i.value = ''; save(); 
     }
     function deleteTask(id) { if(confirm("Uproot?")) { tasks = tasks.filter(t => t.id !== id); save(); } }
-    
-    function toggleSound(type) {
-        const audio = document.getElementById(type + 'Audio');
-        const btn = document.getElementById(type + 'Btn');
-        if (audio.paused) { audio.play(); btn.classList.add('sound-active'); } 
-        else { audio.pause(); btn.classList.remove('sound-active'); }
-    }
+    function toggleSound(s) { const a = document.getElementById(s+'Audio'); a.paused ? a.play() : a.pause(); }
 
     function toggleTimer() {
         const btn = document.getElementById('timerBtn');
@@ -333,29 +316,23 @@
                 timerSeconds--;
                 const m = Math.floor(timerSeconds/60); const s = timerSeconds%60;
                 document.getElementById('timeDisplay').innerText = `${m}:${s<10?'0':''}${s}`;
-                if (timerSeconds <= 0) { clearInterval(timerInterval); alert("Session complete!"); }
+                if (timerSeconds <= 0) { clearInterval(timerInterval); alert("Session over!"); }
             }, 1000);
         }
     }
 
     function exportToCSV() {
-        let csvContent = "data:text/csv;charset=utf-8,id,text,progress,done,focus\n";
-        tasks.forEach(t => { csvContent += `${t.id},"${t.text.replace(/"/g, '""')}",${t.progress},${t.done},${t.focus}\n`; });
-        const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "garden_backup.csv");
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    }
-
-    function importFromCSV(event) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const rows = e.target.result.split("\n").slice(1);
-            tasks = [...tasks, ...rows.filter(r => r.trim()).map(row => {
-                const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                return { id: parseInt(c[0]), text: c[1].replace(/^"|"$/g,'').replace(/""/g,'"'), progress: parseInt(c[2]), done: c[3]==='true', focus: c[4]==='true' };
-            })];
-            save();
-        };
-        reader.readAsText(event.target.files[0]);
+        if (tasks.length === 0) return;
+        let csvContent = "data:text/csv;charset=utf-8,id,text,priority,progress,done,focus\n";
+        tasks.forEach(t => {
+            csvContent += `${t.id},"${t.text.replace(/"/g, '""')}",${t.priority || 'p-low'},${t.progress},${t.done},${t.focus}\n`;
+        });
+        const link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "garden_backup.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     const container = document.getElementById('screen-container');
@@ -365,7 +342,9 @@
     window.ontouchend = (e) => { if (!isDragging) return; isDragging = false; const d = e.changedTouches[0].pageX - startX; if (Math.abs(d) > 50) { if (d < 0 && currentPane < 3) currentPane++; else if (d > 0 && currentPane > 0) currentPane--; } updateLayout(); };
     function updateLayout() { container.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)'; container.style.transform = `translateX(${currentPane * -25}%)`; document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentPane)); }
 
-    initSplash(); updateLayout(); render();
+    initSplash();
+    updateLayout();
+    render();
     document.getElementById('taskInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
 </script>
 </body>

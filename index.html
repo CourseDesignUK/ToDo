@@ -57,38 +57,45 @@
         #screen-container { display: flex; width: 400%; height: 100%; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
 
         .view { 
-            width: 25%; height: 100%; overflow-y: auto; padding: 1.5rem; 
-            padding-top: calc(env(safe-area-inset-top) + 40px); padding-bottom: 240px;
+            width: 25%; height: 100%; overflow-y: auto; padding: 1.2rem; 
+            padding-top: calc(env(safe-area-inset-top) + 20px); padding-bottom: 200px;
         }
 
-        /* Task Cards */
+        /* Compact Task Cards */
         .task-card {
             background: var(--card); backdrop-filter: blur(12px);
-            border-radius: 20px; padding: 1.2rem; margin-bottom: 1rem;
-            border: 1px solid var(--border); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 16px; padding: 0.6rem 0.8rem; margin-bottom: 0.6rem;
+            border: 1px solid var(--border); transition: 0.3s;
+            display: flex; align-items: center; gap: 10px;
         }
         .ping-flash { background: rgba(74, 222, 128, 0.3) !important; border-color: var(--green) !important; transform: scale(1.02); }
-        .growth-stage-icon { font-size: 2rem; margin-right: 15px; display: inline-block; cursor: pointer; line-height: 1; }
+        
+        .growth-stage-icon { font-size: 1.6rem; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; }
+        
+        .task-main { flex: 1; min-width: 0; overflow: hidden; }
+        .task-name { font-weight: 500; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .harvest-meta { font-size: 0.7rem; color: var(--green); margin-top: -2px; }
 
-        .growth-controls { 
-            width: 100%; display: flex; align-items: center; justify-content: space-between; 
-            margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 15px;
-        }
+        .growth-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .percent-badge { font-weight: 800; color: var(--accent); font-size: 0.8rem; min-width: 35px; text-align: center; }
+        
         .step-btn {
-            background: rgba(255,255,255,0.1); border: none; color: #fff;
-            width: 40px; height: 40px; border-radius: 12px; font-size: 1.4rem; cursor: pointer;
+            background: rgba(255,255,255,0.08); border: none; color: #fff;
+            width: 28px; height: 28px; border-radius: 8px; font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
         }
-        .step-btn:disabled { opacity: 0.2; }
+        .step-btn:disabled { opacity: 0.1; }
+        
+        .del-btn { background: none; border: none; color: var(--red); font-size: 1.4rem; cursor: pointer; padding: 0 4px; line-height: 1; }
 
-        .input-bar { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 70px); left: 1.5rem; right: 1.5rem; z-index: 10; }
-        .input-box { background: rgba(15, 23, 42, 0.95); border-radius: 20px; padding: 10px 15px; display: flex; gap: 8px; border: 1px solid var(--border); }
-        input[type="text"] { background: none; border: none; color: #fff; flex: 1; outline: none; }
+        .input-bar { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 70px); left: 1.2rem; right: 1.2rem; z-index: 10; }
+        .input-box { background: rgba(15, 23, 42, 0.95); border-radius: 18px; padding: 8px 12px; display: flex; gap: 8px; border: 1px solid var(--border); }
+        input[type="text"] { background: none; border: none; color: #fff; flex: 1; outline: none; font-size: 1rem; }
         
         .sound-toggle { margin-bottom: 10px; padding: 10px; background: var(--card); border-radius: 10px; cursor: pointer; border: 1px solid var(--border); }
-        
-        .archive-toolbar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-        .tool-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: center; }
-        .tool-btn-secondary { background: none; border: 1px solid var(--border); color: var(--muted); padding: 12px; border-radius: 12px; font-size: 0.85rem; text-align: center; cursor: pointer; }
+        .archive-toolbar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .tool-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 10px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; cursor: pointer; text-align: center; }
+        .tool-btn-secondary { background: none; border: 1px solid var(--border); color: var(--muted); padding: 10px; border-radius: 10px; font-size: 0.8rem; text-align: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -104,33 +111,35 @@
 
 <div id="screen-container">
     <div class="view">
-        <h2 style="color: var(--accent)">Mindful Space</h2>
-        <div class="sound-toggle" onclick="toggleSound('storm')">⚡ Storm</div>
-        <div class="sound-toggle" onclick="toggleSound('birds')">🐦 Birdsong</div>
-        <div style="text-align: center; margin-top: 50px;">
-            <div style="font-size: 3.5rem; font-weight: 800;" id="timeDisplay">25:00</div>
-            <button onclick="toggleTimer()" id="timerBtn" style="margin-top:25px; background:var(--accent); color:var(--bg); border:none; padding:15px 40px; border-radius:30px; font-weight:bold;">Start Focus</button>
+        <h2 style="color: var(--accent); margin-top:0;">Mindful Space</h2>
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <div class="sound-toggle" style="flex:1; margin:0; text-align:center;" onclick="toggleSound('storm')">⚡ Storm</div>
+            <div class="sound-toggle" style="flex:1; margin:0; text-align:center;" onclick="toggleSound('birds')">🐦 Birdsong</div>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <div style="font-size: 4rem; font-weight: 800; letter-spacing: -2px;" id="timeDisplay">25:00</div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button onclick="toggleTimer()" id="timerBtn" style="background:var(--accent); color:var(--bg); border:none; padding:12px 30px; border-radius:30px; font-weight:bold;">Start Focus</button>
+                <button onclick="resetTimer()" id="resetBtn" style="background:transparent; border:1px solid var(--border); color:var(--muted); padding:12px 20px; border-radius:30px; font-weight:bold; display: none;">Reset</button>
+            </div>
         </div>
     </div>
 
     <div class="view">
-        <h2 style="color: var(--accent)">Inbox</h2>
+        <h2 style="color: var(--accent); margin-top:0;">Inbox</h2>
         <div id="inbox-list"></div>
     </div>
 
     <div class="view">
-        <h2 style="color: var(--yellow)">Daily Focus</h2>
+        <h2 style="color: var(--yellow); margin-top:0;">Daily Focus</h2>
         <div id="focus-list"></div>
     </div>
 
     <div class="view">
-        <h2 style="color: var(--muted)">Harvested</h2>
+        <h2 style="color: var(--muted); margin-top:0;">Harvested</h2>
         <div class="archive-toolbar">
             <button class="tool-btn" onclick="exportToCSV()">📤 Export taskgarden.csv</button>
-            <label class="tool-btn-secondary">
-                📥 Import taskgarden.csv
-                <input type="file" accept=".csv" onchange="importCSV(event)" style="display:none;">
-            </label>
+            <label class="tool-btn-secondary">📥 Import taskgarden.csv <input type="file" accept=".csv" onchange="importCSV(event)" style="display:none;"></label>
         </div>
         <div id="archive-list"></div>
     </div>
@@ -139,30 +148,31 @@
 <div class="input-bar">
     <div class="input-box">
         <input type="text" id="taskInput" placeholder="Sow a seed..." autocomplete="off">
-        <button onclick="addTask()" style="background:var(--accent); border:none; border-radius:12px; width:44px; height:44px; color:#020617; font-weight:bold;">+</button>
+        <button onclick="addTask()" style="background:var(--accent); border:none; border-radius:12px; width:40px; height:40px; color:#020617; font-weight:bold;">+</button>
     </div>
 </div>
 
 <audio id="stormAudio" loop src="storm.mp3"></audio>
 <audio id="birdsAudio" loop src="birdsong.mp3"></audio>
 <audio id="pingAudio" src="ping.mp3"></audio>
+<audio id="bellAudio" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
 
 <script>
     const quotes = [
         { q: "Life is about making an impact, not making an income.", a: "Kevin Kruse" },
         { q: "Whatever the mind of man can conceive and believe, it can achieve.", a: "Napoleon Hill" },
         { q: "Strive not to be a success, but rather to be of value.", a: "Albert Einstein" },
-        { q: "Two roads diverged in a wood, and I—I took the one less traveled by, And that has made all the difference.", a: "Robert Frost" },
+        { q: "Two roads diverged in a wood, and I—I took the one less traveled by.", a: "Robert Frost" },
         { q: "I attribute my success to this: I never gave or took any excuse.", a: "Florence Nightingale" },
         { q: "You miss 100% of the shots you don’t take.", a: "Wayne Gretzky" },
-        { q: "I've missed more than 9000 shots in my career. I've lost almost 300 games. 26 times I've been trusted to take the game winning shot and missed.", a: "Michael Jordan" },
+        { q: "I've missed more than 9000 shots in my career. I've failed over and over and over again.", a: "Michael Jordan" },
         { q: "The most difficult thing is the decision to act, the rest is merely tenacity.", a: "Amelia Earhart" },
         { q: "Every strike brings me closer to the next home run.", a: "Babe Ruth" },
         { q: "Definiteness of purpose is the starting point of all achievement.", a: "W. Clement Stone" },
         { q: "Life isn't about getting and having, it's about giving and being.", a: "Kevin Kruse" },
         { q: "Life is what happens to you while you’re busy making other plans.", a: "John Lennon" },
         { q: "We become what we think about.", a: "Earl Nightingale" },
-        { q: "Twenty years from now you will be more disappointed by the things that you didn’t do than by the ones you did do.", a: "Mark Twain" },
+        { q: "Twenty years from now you will be more disappointed by the things that you didn’t do.", a: "Mark Twain" },
         { q: "Life is 10% what happens to me and 90% of how I react to it.", a: "Charles Swindoll" },
         { q: "The most common way people give up their power is by thinking they don’t have any.", a: "Alice Walker" },
         { q: "The mind is everything. What you think you become.", a: "Buddha" },
@@ -180,39 +190,41 @@
         { q: "The two most important days in your life are the day you are born and the day you find out why.", a: "Mark Twain" },
         { q: "Whatever you can do, or dream you can, begin it. Boldness has genius, power and magic in it.", a: "Goethe" },
         { q: "The best revenge is massive success.", a: "Frank Sinatra" },
-        { q: "Motivation doesn’t last. Neither does bathing. That’s why we recommend it daily.", a: "Zig Ziglar" },
+        { q: "People often say that motivation doesn’t last. Well, neither does bathing. That’s why we recommend it daily.", a: "Zig Ziglar" },
         { q: "Life shrinks or expands in proportion to one's courage.", a: "Anais Nin" },
-        { q: "If you hear a voice within you say 'you cannot paint,' then by all means paint.", a: "Vincent Van Gogh" },
+        { q: "If you hear a voice within you say 'you cannot paint,' then by all means paint and that voice will be silenced.", a: "Vincent Van Gogh" },
         { q: "There is only one way to avoid criticism: do nothing, say nothing, and be nothing.", a: "Aristotle" },
-        { q: "Ask and it will be given to you; search, and you will find.", a: "Jesus" },
+        { q: "Ask and it will be given to you; search, and you will find; knock and the door will be opened for you.", a: "Jesus" },
         { q: "The only person you are destined to become is the person you decide to be.", a: "Ralph Waldo Emerson" },
         { q: "Go confidently in the direction of your dreams. Live the life you have imagined.", a: "Henry David Thoreau" },
-        { q: "I would hope that I used everything you gave me.", a: "Erma Bombeck" },
-        { q: "Few things can help an individual more than to place responsibility on him.", a: "Booker T. Washington" },
-        { q: "Certain things catch your eye, but pursue only those that capture the heart.", a: "Ancient Proverb" },
+        { q: "When I stand before God at the end of my life, I would hope that I would not have a single bit of talent left and could say, I used everything you gave me.", a: "Erma Bombeck" },
+        { q: "Few things can help an individual more than to place responsibility on him, and to let him know that you trust him.", a: "Booker T. Washington" },
+        { q: "Certain things catch your eye, but pursue only those that capture the heart.", a: "Ancient Indian Proverb" },
         { q: "Believe you can and you’re halfway there.", a: "Theodore Roosevelt" },
         { q: "Everything you’ve ever wanted is on the other side of fear.", a: "George Addair" },
-        { q: "We can easily forgive a child who is afraid of the dark; the real tragedy is when men are afraid of the light.", a: "Plato" },
+        { q: "We can easily forgive a child who is afraid of the dark; the real tragedy of life is when men are afraid of the light.", a: "Plato" },
         { q: "Teach thy tongue to say, 'I do not know,' and thou shalt progress.", a: "Maimonides" },
         { q: "Start where you are. Use what you have. Do what you can.", a: "Arthur Ashe" },
-        { q: "When I was 5, my mother told me happiness was the key to life.", a: "John Lennon" },
+        { q: "When I was 5 years old, my mother always told me that happiness was the key to life.", a: "John Lennon" },
         { q: "Fall seven times and stand up eight.", a: "Japanese Proverb" },
         { q: "When one door of happiness closes, another opens.", a: "Helen Keller" },
         { q: "Everything has beauty, but not everyone can see.", a: "Confucius" },
         { q: "How wonderful it is that nobody need wait a single moment before starting to improve the world.", a: "Anne Frank" },
         { q: "When I let go of what I am, I become what I might be.", a: "Lao Tzu" },
+        { q: "Life is not measured by the number of breaths we take, but by the moments that take our breath away.", a: "Maya Angelou" },
         { q: "Happiness is not something readymade. It comes from your own actions.", a: "Dalai Lama" },
         { q: "If you're offered a seat on a rocket ship, don't ask what seat! Just get on.", a: "Sheryl Sandberg" },
+        { q: "First, have a definite, clear practical ideal; a goal, an objective.", a: "Aristotle" },
         { q: "If the wind will not serve, take to the oars.", a: "Latin Proverb" },
-        { q: "You can’t fall if you don’t climb. But there’s no joy in living on the ground.", a: "Unknown" },
-        { q: "We must believe that we are gifted for something.", a: "Marie Curie" },
+        { q: "You can’t fall if you don’t climb. But there’s no joy in living your whole life on the ground.", a: "Unknown" },
+        { q: "We must believe that we are gifted for something, and that this thing, at whatever cost, must be attained.", a: "Marie Curie" },
         { q: "Too many of us are not living our dreams because we are living our fears.", a: "Les Brown" },
-        { q: "Challenges are what make life interesting.", a: "Joshua J. Marine" },
+        { q: "Challenges are what make life interesting and overcoming them is what makes life meaningful.", a: "Joshua J. Marine" },
         { q: "If you want to lift yourself up, lift up someone else.", a: "Booker T. Washington" },
-        { q: "Knowing is not enough; we must apply. Willing is not enough; we must do.", a: "Leonardo da Vinci" },
-        { q: "Limitations live only in our minds.", a: "Jamie Paolinetti" },
+        { q: "Knowing is not enough; we must apply. Being willing is not enough; we must do.", a: "Leonardo da Vinci" },
+        { q: "Limitations live only in our minds. But if we use our imaginations, our possibilities become limitless.", a: "Jamie Paolinetti" },
         { q: "You take your life in your own hands, and what happens? A terrible thing, no one to blame.", a: "Erica Jong" },
-        { q: "A man is a success if he gets up in the morning and does what he wants to do.", a: "Bob Dylan" },
+        { q: "What’s money? A man is a success if he gets up in the morning and goes to bed at night and in between does what he wants to do.", a: "Bob Dylan" },
         { q: "I didn’t fail the test. I just found 100 ways to do it wrong.", a: "Benjamin Franklin" },
         { q: "In order to succeed, your desire for success should be greater than your fear of failure.", a: "Bill Cosby" },
         { q: "A person who never made a mistake never tried anything new.", a: "Albert Einstein" },
@@ -222,20 +234,22 @@
         { q: "You become what you believe.", a: "Oprah Winfrey" },
         { q: "I would rather die of passion than of boredom.", a: "Vincent van Gogh" },
         { q: "A truly rich man is one whose children run into his arms when his hands are empty.", a: "Unknown" },
+        { q: "It is not what you do for your children, but what you have taught them to do for themselves.", a: "Ann Landers" },
+        { q: "If you want your children to turn out well, spend twice as much time with them, and half as much money.", a: "Abigail Van Buren" },
         { q: "Build your own dreams, or someone else will hire you to build theirs.", a: "Farrah Gray" },
-        { q: "The struggles within yourself—that's where it's at.", a: "Jesse Owens" },
+        { q: "The invisible battles inside all of us--that's where it's at.", a: "Jesse Owens" },
         { q: "Education costs money. But then so does ignorance.", a: "Sir Claus Moser" },
-        { q: "I have learned that when one's mind is made up, this diminishes fear.", a: "Rosa Parks" },
+        { q: "I have learned over the years that when one's mind is made up, this diminishes fear.", a: "Rosa Parks" },
         { q: "It does not matter how slowly you go as long as you do not stop.", a: "Confucius" },
         { q: "If you look at what you have in life, you'll always have more.", a: "Oprah Winfrey" },
-        { q: "Remember that not getting what you want is sometimes a stroke of luck.", a: "Dalai Lama" },
+        { q: "Remember that not getting what you want is sometimes a wonderful stroke of luck.", a: "Dalai Lama" },
         { q: "You can’t use up creativity. The more you use, the more you have.", a: "Maya Angelou" },
         { q: "Dream big and dare to fail.", a: "Norman Vaughan" },
-        { q: "Our lives begin to end the day we become silent about things that matter.", a: "MLK Jr." },
+        { q: "Our lives begin to end the day we become silent about things that matter.", a: "Martin Luther King Jr." },
         { q: "Do what you can, where you are, with what you have.", a: "Teddy Roosevelt" },
         { q: "If you do what you’ve always done, you’ll get what you’ve always gotten.", a: "Tony Robbins" },
         { q: "Dreaming, after all, is a form of planning.", a: "Gloria Steinem" },
-        { q: "Go on and do all you can with it, and make it the life you want to live.", a: "Mae Jemison" },
+        { q: "It's your place in the world; it's your life. Go on and do all you can with it.", a: "Mae Jemison" },
         { q: "You may be disappointed if you fail, but you are doomed if you don't try.", a: "Beverly Sills" },
         { q: "Remember no one can make you feel inferior without your consent.", a: "Eleanor Roosevelt" },
         { q: "Life is what we make it, always has been, always will be.", a: "Grandma Moses" },
@@ -252,12 +266,11 @@
     function initSplash() {
         const now = new Date();
         const start = new Date(now.getFullYear(), 0, 0);
-        const diff = now - start;
-        const day = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const day = Math.floor((now - start) / (1000 * 60 * 60 * 24));
         const quote = quotes[day % quotes.length];
         document.getElementById('splash-quote').innerText = `"${quote.q}"`;
         document.getElementById('splash-author').innerText = `— ${quote.a}`;
-        setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 2500);
+        setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 2200);
     }
 
     let tasks = JSON.parse(localStorage.getItem('garden_tasks') || '[]');
@@ -271,25 +284,28 @@
     function render() {
         const lists = { inbox: document.getElementById('inbox-list'), focus: document.getElementById('focus-list'), archive: document.getElementById('archive-list') };
         Object.values(lists).forEach(l => l.innerHTML = '');
+
         tasks.forEach(t => {
             const card = document.createElement('div');
             card.className = 'task-card';
             const icon = t.done ? '🌳' : growthIcons[t.progress];
+            
             card.innerHTML = `
-                <div style="display:flex; align-items:flex-start;">
-                    <span class="growth-stage-icon" onclick="toggleFocus(${t.id})">${icon}</span>
-                    <div style="flex:1; ${t.done ? 'opacity:0.5;' : ''}">
-                        <div style="font-weight:600; ${t.done ? 'text-decoration:line-through;' : ''}">${t.text}</div>
-                        ${t.done ? `<div style="font-size:0.75rem; color:var(--green); margin-top:4px;">Harvested • ${t.completedDate || 'Recently'}</div>` : ''}
-                    </div>
-                    <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--red); font-size:1.5rem; line-height:1;">&times;</button>
+                <div class="growth-stage-icon" onclick="toggleFocus(${t.id})">${icon}</div>
+                <div class="task-main">
+                    <div class="task-name" style="${t.done ? 'text-decoration:line-through; opacity:0.6;' : ''}">${t.text}</div>
+                    ${t.done ? `<div class="harvest-meta">Harvested • ${t.completedDate || ''}</div>` : ''}
                 </div>
-                ${!t.done ? `<div class="growth-controls">
-                    <button class="step-btn" onclick="adjustProgress(${t.id}, -1, this)" ${t.progress===0?'disabled':''}>−</button>
-                    <div style="font-weight:800; color:var(--accent)">${t.progress}%</div>
-                    <button class="step-btn" onclick="adjustProgress(${t.id}, 1, this)" ${t.progress===100?'disabled':''}>+</button>
-                </div>` : ''}
+                ${!t.done ? `
+                    <div class="growth-controls">
+                        <button class="step-btn" onclick="adjustProgress(${t.id}, -1, this)" ${t.progress===0?'disabled':''}>−</button>
+                        <div class="percent-badge">${t.progress}%</div>
+                        <button class="step-btn" onclick="adjustProgress(${t.id}, 1, this)" ${t.progress===100?'disabled':''}>+</button>
+                    </div>
+                ` : ''}
+                <button class="del-btn" onclick="deleteTask(${t.id})">&times;</button>
             `;
+            
             if(t.done) lists.archive.appendChild(card);
             else if(t.focus) lists.focus.appendChild(card);
             else lists.inbox.appendChild(card);
@@ -304,10 +320,10 @@
             const old = t.progress; t.progress = steps[idx];
             if (t.progress === 100 && old < 100) {
                 t.done = true;
-                t.completedDate = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                t.completedDate = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 document.getElementById('pingAudio').play().catch(()=>{});
                 el.closest('.task-card').classList.add('ping-flash');
-                setTimeout(save, 500);
+                setTimeout(save, 400);
             } else { t.done = (t.progress === 100); if(!t.done) delete t.completedDate; save(); }
         }
     }
@@ -322,33 +338,43 @@
     function deleteTask(id) { if(confirm("Uproot?")) { tasks = tasks.filter(t => t.id !== id); save(); } }
     function toggleSound(s) { const a = document.getElementById(s+'Audio'); a.paused ? a.play() : a.pause(); }
 
+    function updateTimerDisplay() {
+        const m = Math.floor(timerSeconds/60), s = timerSeconds%60;
+        document.getElementById('timeDisplay').innerText = `${m}:${s<10?'0':''}${s}`;
+    }
+
     function toggleTimer() {
-        const btn = document.getElementById('timerBtn');
+        const btn = document.getElementById('timerBtn'), resetBtn = document.getElementById('resetBtn');
         if (timerInterval) { clearInterval(timerInterval); timerInterval = null; btn.innerText = 'Resume'; }
         else {
-            btn.innerText = 'Pause';
+            if (timerSeconds <= 0) timerSeconds = 25 * 60;
+            btn.innerText = 'Pause'; resetBtn.style.display = 'block';
             timerInterval = setInterval(() => {
-                timerSeconds--;
-                const m = Math.floor(timerSeconds/60), s = timerSeconds%60;
-                document.getElementById('timeDisplay').innerText = `${m}:${s<10?'0':''}${s}`;
-                if (timerSeconds <= 0) { clearInterval(timerInterval); alert("Session over!"); }
+                timerSeconds--; updateTimerDisplay();
+                if (timerSeconds <= 0) { 
+                    clearInterval(timerInterval); timerInterval = null;
+                    btn.innerText = 'Start Focus'; document.getElementById('bellAudio').play().catch(()=>{});
+                    alert("Focus session complete!"); 
+                }
             }, 1000);
         }
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval); timerInterval = null; timerSeconds = 25 * 60;
+        updateTimerDisplay(); document.getElementById('timerBtn').innerText = 'Start Focus';
+        document.getElementById('resetBtn').style.display = 'none';
     }
 
     function exportToCSV() {
         let csv = "id,text,progress,done,focus,completedDate\n";
         tasks.forEach(t => csv += `${t.id},"${t.text.replace(/"/g, '""')}",${t.progress},${t.done},${t.focus},"${t.completedDate||''}"\n`);
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "taskgarden.csv";
-        link.click();
+        const b = new Blob([csv], { type: 'text/csv' });
+        const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download = "taskgarden.csv"; l.click();
     }
 
     function importCSV(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = function(event) {
             try {

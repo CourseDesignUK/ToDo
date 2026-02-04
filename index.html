@@ -15,7 +15,7 @@
             --red: #ef4444;
             --border: rgba(255, 255, 255, 0.1);
         }
-
+a
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         html, body { 
@@ -279,13 +279,13 @@
         }, 3000);
     }
 
-    let tasks = JSON.parse(localStorage.getItem('garden_tasks') || '[]');
+    let tasks = JSON.parse(localStorage.getItem('Tasks') || '[]');
     let currentPane = 1;
     let timerSeconds = 25 * 60;
     let timerInterval = null;
     const growthIcons = { 0: '🫘', 25: '🌱', 50: '🌿', 75: '🪴', 100: '🌳' };
 
-    function save() { localStorage.setItem('garden_tasks', JSON.stringify(tasks)); render(); }
+    function save() { localStorage.setItem('Tasks', JSON.stringify(tasks)); render(); }
 
     function render() {
         const lists = { inbox: document.getElementById('inbox-list'), focus: document.getElementById('focus-list'), archive: document.getElementById('archive-list') };
@@ -341,7 +341,7 @@
         tasks.push({ id: Date.now(), text: i.value, progress: 0, done: false, focus: currentPane === 2 }); 
         i.value = ''; save(); 
     }
-    function deleteTask(id) { if(confirm("Uproot?")) { tasks = tasks.filter(t => t.id !== id); save(); } }
+    function deleteTask(id) { if(confirm("Cancel task?")) { tasks = tasks.filter(t => t.id !== id); save(); } }
     function toggleSound(s) { const a = document.getElementById(s+'Audio'); a.paused ? a.play() : a.pause(); }
 
     function updateTimerDisplay() {

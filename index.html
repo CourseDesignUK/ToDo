@@ -140,8 +140,8 @@
     <div class="view">
         <h2 style="color: var(--muted); margin-top:0;">Harvested</h2>
         <div class="archive-toolbar">
-            <button class="tool-btn" onclick="exportToCSV()">📤 Export taskgarden.csv</button>
-            <label class="tool-btn-secondary">📥 Import taskgarden.csv <input type="file" accept=".csv" onchange="importCSV(event)" style="display:none;"></label>
+            <button class="tool-btn" onclick="exportToCSV()">📤 Export tasks.csv</button>
+            <label class="tool-btn-secondary">📥 Import tasks.csv <input type="file" accept=".csv" onchange="importCSV(event)" style="display:none;"></label>
         </div>
         <div id="archive-list"></div>
     </div>
@@ -276,7 +276,7 @@
         // Hide after exactly 2 seconds (2000ms)
         setTimeout(() => {
             document.getElementById('splash-screen').classList.add('hidden');
-        }, 2500);
+        }, 3000);
     }
 
     let tasks = JSON.parse(localStorage.getItem('garden_tasks') || '[]');
@@ -376,7 +376,7 @@
         let csv = "id,text,progress,done,focus,completedDate\n";
         tasks.forEach(t => csv += `${t.id},"${t.text.replace(/"/g, '""')}",${t.progress},${t.done},${t.focus},"${t.completedDate||''}"\n`);
         const b = new Blob([csv], { type: 'text/csv' });
-        const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download = "taskgarden.csv"; l.click();
+        const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download = "tasks.csv"; l.click();
     }
 
     function importCSV(e) {

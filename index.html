@@ -138,7 +138,7 @@
     </div>
 
     <div class="view">
-        <h2 style="color: var(--muted); margin-top:0;">Harvested</h2>
+        <h2 style="color: var(--muted); margin-top:0;">Completed Tasks</h2>
         <div class="archive-toolbar">
             <button class="tool-btn" onclick="exportToCSV()">📤 Export tasks.csv</button>
             <label class="tool-btn-secondary">📥 Import tasks.csv <input type="file" accept=".csv" onchange="importCSV(event)" style="display:none;"></label>
@@ -149,7 +149,7 @@
 
 <div class="input-bar">
     <div class="input-box">
-        <input type="text" id="taskInput" placeholder="Sow a seed..." autocomplete="off">
+        <input type="text" id="taskInput" placeholder="New task..." autocomplete="off">
         <button onclick="addTask()" style="background:var(--accent); border:none; border-radius:12px; width:40px; height:40px; color:#020617; font-weight:bold;">+</button>
     </div>
 </div>

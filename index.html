@@ -33,15 +33,17 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 2000; transition: opacity 0.8s ease, visibility 2.0s;
+            z-index: 2000; 
+            /* Smooth fade out */
+            transition: opacity 0.8s ease, visibility 0.8s;
             padding: 2.5rem; text-align: center;
         }
         #splash-quote {
             font-size: 1.1rem; font-weight: 300; font-style: italic; line-height: 1.6;
             max-width: 600px; color: #fff; margin-bottom: 20px;
-            opacity: 0; transform: translateY(10px); animation: fadeInUp 3s forwards 0.3s;
+            opacity: 0; transform: translateY(10px); animation: fadeInUp 1.5s forwards 0.2s;
         }
-        #splash-author { font-size: 0.8rem; color: var(--accent); opacity: 0; animation: fadeInUp 1s forwards 0.6s; letter-spacing: 1px; text-transform: uppercase; }
+        #splash-author { font-size: 0.8rem; color: var(--accent); opacity: 0; animation: fadeInUp 0.8s forwards 0.5s; letter-spacing: 1px; text-transform: uppercase; }
         
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
         .hidden { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -270,7 +272,11 @@
         const quote = quotes[day % quotes.length];
         document.getElementById('splash-quote').innerText = `"${quote.q}"`;
         document.getElementById('splash-author').innerText = `— ${quote.a}`;
-        setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 2200);
+        
+        // Hide after exactly 2 seconds (2000ms)
+        setTimeout(() => {
+            document.getElementById('splash-screen').classList.add('hidden');
+        }, 2500);
     }
 
     let tasks = JSON.parse(localStorage.getItem('garden_tasks') || '[]');
